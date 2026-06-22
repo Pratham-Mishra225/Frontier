@@ -9,11 +9,9 @@ description = "Stateless, high-performance Mean-Variance portfolio optimization 
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [
-    { name = "Pratham Mishra", email = "prathammishra1729@gamil.com" }
+    { name = "Pratham Mishra", email = "prathammishra1729@gmail.com" }
 ]
 dependencies = [
-    "fastapi>=0.100.0",
-    "uvicorn>=0.23.0",
     "pydantic>=2.0.0",
     "numpy>=1.24.0",
     "scipy>=1.10.0",
@@ -22,6 +20,20 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+# Run the FastAPI web server: pip install frontier-api[server]
+server = [
+    "fastapi>=0.100.0",
+    "uvicorn>=0.23.0",
+]
+# Development tools: pip install frontier-api[dev]
 dev = [
     "pytest",
+    "httpx",
+]
+# Everything at once: pip install frontier-api[all]
+all = [
+    "fastapi>=0.100.0",
+    "uvicorn>=0.23.0",
+    "pytest",
+    "httpx",
 ]
