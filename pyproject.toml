@@ -43,4 +43,10 @@ testpaths = ["tests"]
 addopts = "-v"
 markers = [
     "network: marks tests that require a live internet connection (Yahoo Finance)",
-]
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
