@@ -1,4 +1,4 @@
-# Frontier API
+# Frontier
 
 A Python library for portfolio optimization, efficient frontier analysis, and quantitative asset allocation.
 
