@@ -9,8 +9,7 @@ Coverage:
   POST /v1/optimize                    — happy path, invalid payloads, convergence failure
   POST /v1/optimize_from_tickers       — mocked happy path, missing field
 """
-import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from fastapi.testclient import TestClient
 
 from frontier.api.main import app

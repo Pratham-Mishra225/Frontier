@@ -2,6 +2,7 @@ import numpy as np
 import scipy.optimize as sco
 from typing import Dict, List, Tuple
 
+
 from frontier.exceptions import ConvergenceError
 
 TRADING_DAYS_PER_YEAR = 252
@@ -58,7 +59,7 @@ def optimize_portfolio(returns_dict: Dict[str, List[float]], risk_free_rate: flo
     initial_guess = np.array(num_assets * [1.0 / num_assets])
 
     # 3. Find Maximum Sharpe Ratio Portfolio
-    opt_sharpe = sco.minimize(
+    opt_sharpe = sco.minimize( # type: ignore[call-overload]
         negative_sharpe_ratio,
         initial_guess,
         args=(mean_returns, cov_matrix, risk_free_rate),
@@ -95,7 +96,7 @@ def optimize_portfolio(returns_dict: Dict[str, List[float]], risk_free_rate: flo
             {'type': 'eq', 'fun': lambda x, t=target: portfolio_performance(x, mean_returns, cov_matrix)[0] - t}
         )
         
-        ef_res = sco.minimize(
+        ef_res = sco.minimize(  # type: ignore[call-overload]
             minimize_volatility,
             initial_guess,
             args=(mean_returns, cov_matrix),

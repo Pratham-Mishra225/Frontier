@@ -11,32 +11,68 @@ requires-python = ">=3.10"
 authors = [
     { name = "Pratham Mishra", email = "prathammishra1729@gmail.com" }
 ]
+license = "MIT"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Financial and Insurance Industry",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+keywords = [
+    "portfolio-optimization",
+    "quantitative-finance",
+    "efficient-frontier",
+    "markowitz",
+    "portfolio-management",
+    "finance",
+    "optimization"
+]
+
 dependencies = [
     "pydantic>=2.0.0",
     "numpy>=1.24.0",
     "scipy>=1.10.0",
+]
+
+[project.optional-dependencies]
+
+data = [
     "yfinance>=0.2.28",
     "pandas>=2.0.0"
 ]
 
-[project.optional-dependencies]
-# Run the FastAPI web server: pip install frontier-api[server]
 server = [
     "fastapi>=0.100.0",
-    "uvicorn>=0.23.0",
+    "uvicorn>=0.23.0"
 ]
-# Development tools: pip install frontier-api[dev]
+
 dev = [
     "pytest",
+    "pytest-cov",
     "httpx",
+    "ruff",
+    "mypy"
 ]
-# Everything at once: pip install frontier-api[all]
+
 all = [
+    "yfinance>=0.2.28",
+    "pandas>=2.0.0",
     "fastapi>=0.100.0",
     "uvicorn>=0.23.0",
     "pytest",
+    "pytest-cov",
     "httpx",
+    "ruff",
+    "mypy"
 ]
+
+[project.urls]
+Homepage = "https://github.com/Pratham-Mishra225/frontier-api"
+Repository = "https://github.com/Pratham-Mishra225/frontier-api"
+Issues = "https://github.com/Pratham-Mishra225/frontier-api/issues"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -50,3 +86,11 @@ package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.mypy]
+python_version = "3.12"
+
+[[tool.mypy.overrides]]
+module = ["yfinance", "yfinance.*"]
+ignore_missing_imports = true
+
