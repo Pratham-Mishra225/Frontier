@@ -7,7 +7,7 @@ Minimalist public API. Import directly from the top-level package:
 
 For the FastAPI web server install the [server] extra:
 
-    pip install frontier-api[server]
+    pip install frontier-quant[server]
 
 then run:
 
@@ -23,7 +23,7 @@ from .adapters.yfinance_client import fetch_historical_returns as fetch_data
 from importlib.metadata import version as _pkg_version, PackageNotFoundError as _PNF
 
 try:
-    __version__ = _pkg_version("frontier-api")
+    __version__ = _pkg_version("frontier-quant")
 except _PNF:
     # Package not yet installed (e.g. bare source checkout without pip install -e .)
     __version__ = "0.0.0+dev"

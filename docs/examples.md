@@ -8,14 +8,14 @@ Four complete, copy-paste runnable workflows covering the most common Frontier u
 
 **Scenario:** You have your own return data (from a database, Bloomberg, or a CSV file) and want to find the optimal portfolio weights. No internet connection required.
 
-**Install:** `pip install frontier-api`
+**Install:** `pip install frontier-quant`
 
 ```python
 """
 Example 1: Pure optimization workflow — bring your own data.
 
 No network calls. Works with any return data source.
-Install: pip install frontier-api
+Install: pip install frontier-quant
 """
 
 from frontier import optimize
@@ -104,14 +104,14 @@ Efficient Frontier: 20 points computed
 
 **Scenario:** You want to optimize a real portfolio using live market data fetched from Yahoo Finance.
 
-**Install:** `pip install frontier-api[data]`
+**Install:** `pip install frontier-quant[data]`
 
 ```python
 """
 Example 2: Yahoo Finance workflow — live market data.
 
 Fetches 3 years of adjusted-close prices and optimizes.
-Install: pip install frontier-api[data]
+Install: pip install frontier-quant[data]
 Requires: internet connection
 """
 
@@ -202,7 +202,7 @@ Efficient Frontier — 20 points
 
 **Scenario:** You want to deploy Frontier as a microservice that other applications can call over HTTP.
 
-**Install:** `pip install frontier-api[all]`
+**Install:** `pip install frontier-quant[all]`
 
 ### Starting the server
 
@@ -344,7 +344,7 @@ console.log('Frontier points:', result.frontier_curve.length);
 
 **Scenario:** You want to use the data adapter to fetch real data, inspect the intermediate returns object, then pass it directly into the optimizer — without going through HTTP.
 
-**Install:** `pip install frontier-api[data]`
+**Install:** `pip install frontier-quant[data]`
 
 ```python
 """

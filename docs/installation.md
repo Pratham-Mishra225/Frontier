@@ -16,7 +16,7 @@ Frontier uses **optional extras** so that you only install the dependencies your
 ### 1. Core Library Only
 
 ```bash
-pip install frontier-api
+pip install frontier-quant
 ```
 
 **What this installs:**
@@ -33,7 +33,7 @@ pip install frontier-api
 ### 2. Core + Yahoo Finance Data Adapter
 
 ```bash
-pip install frontier-api[data]
+pip install frontier-quant[data]
 ```
 
 **Adds on top of core:**
@@ -49,7 +49,7 @@ pip install frontier-api[data]
 ### 3. Core + FastAPI Server
 
 ```bash
-pip install frontier-api[server]
+pip install frontier-quant[server]
 ```
 
 **Adds on top of core:**
@@ -67,13 +67,13 @@ pip install frontier-api[server]
 ### 4. All Production Extras
 
 ```bash
-pip install frontier-api[all]
+pip install frontier-quant[all]
 ```
 
 Installs everything: `[data]` + `[server]`. Equivalent to:
 
 ```bash
-pip install frontier-api[data,server]
+pip install frontier-quant[data,server]
 ```
 
 **Best for:** Full deployments where you want both the data adapter and the HTTP server.
@@ -156,18 +156,18 @@ Editable mode (`-e`) means changes to `src/frontier/` are immediately reflected 
 
 ### `ModuleNotFoundError: No module named 'yfinance'`
 
-You installed `frontier-api` (core only) but called `fetch_data()`. Fix:
+You installed `frontier-quant` (core only) but called `fetch_data()`. Fix:
 
 ```bash
-pip install frontier-api[data]
+pip install frontier-quant[data]
 ```
 
 ### `ModuleNotFoundError: No module named 'fastapi'`
 
-You installed `frontier-api` or `frontier-api[data]` but tried to run the server. Fix:
+You installed `frontier-quant` or `frontier-quant[data]` but tried to run the server. Fix:
 
 ```bash
-pip install frontier-api[server]
+pip install frontier-quant[server]
 ```
 
 ### `ImportError` on Python 3.9
@@ -181,5 +181,5 @@ If another package pins an older `yfinance`, install into a fresh venv:
 ```bash
 python -m venv .venv-frontier
 .venv-frontier/Scripts/activate
-pip install frontier-api[all]
+pip install frontier-quant[all]
 ```

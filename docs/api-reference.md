@@ -111,7 +111,7 @@ for point in result["frontier_curve"]:
 
 **Alias for `frontier.adapters.yfinance_client.fetch_historical_returns`.**
 
-> Requires `pip install frontier-api[data]`
+> Requires `pip install frontier-quant[data]`
 
 ### Signature
 
@@ -338,7 +338,7 @@ Response model for both `/v1/optimize` endpoints.
 
 ## REST API Endpoints
 
-> Requires `pip install frontier-api[server]`
+> Requires `pip install frontier-quant[server]`
 
 ### `GET /health`
 
@@ -387,7 +387,7 @@ Pure-math endpoint. Accepts pre-calculated returns. No network calls made by the
 
 Convenience endpoint. Accepts ticker symbols, fetches data internally via yfinance.
 
-> Requires yfinance to be installed (`pip install frontier-api[all]`).
+> Requires yfinance to be installed (`pip install frontier-quant[all]`).
 
 **Request body:**
 ```json

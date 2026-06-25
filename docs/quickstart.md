@@ -9,13 +9,13 @@ Get your first portfolio optimization running in under 5 minutes.
 Install Frontier first. If you just want the optimizer with no external data calls:
 
 ```bash
-pip install frontier-api
+pip install frontier-quant
 ```
 
 To also fetch live Yahoo Finance data:
 
 ```bash
-pip install frontier-api[data]
+pip install frontier-quant[data]
 ```
 
 ---
@@ -87,7 +87,7 @@ Frontier curve points  : 20
 Install the data adapter:
 
 ```bash
-pip install frontier-api[data]
+pip install frontier-quant[data]
 ```
 
 Then:
@@ -216,7 +216,7 @@ returns = {"AAPL": [0.01, 0.02, -0.01]}
 from frontier import fetch_data   # ImportError if [data] not installed
 ```
 
-Fix: `pip install frontier-api[data]`
+Fix: `pip install frontier-quant[data]`
 
 ### ❌ Forgetting to install the server extra before running uvicorn
 
@@ -224,7 +224,7 @@ Fix: `pip install frontier-api[data]`
 uvicorn frontier.api.main:app  # ModuleNotFoundError: No module named 'fastapi'
 ```
 
-Fix: `pip install frontier-api[server]`
+Fix: `pip install frontier-quant[server]`
 
 ---
 

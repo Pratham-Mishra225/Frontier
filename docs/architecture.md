@@ -249,11 +249,11 @@ HTTP 200
 ## Dependency Graph by Extra
 
 ```
-pip install frontier-api           →  numpy, scipy, pydantic
-pip install frontier-api[data]     →  + yfinance, pandas
-pip install frontier-api[server]   →  + fastapi, uvicorn
-pip install frontier-api[all]      →  + yfinance, pandas, fastapi, uvicorn
-pip install frontier-api[dev]      →  + pytest, ruff, mypy, httpx, stubs
+pip install frontier-quant           →  numpy, scipy, pydantic
+pip install frontier-quant[data]     →  + yfinance, pandas
+pip install frontier-quant[server]   →  + fastapi, uvicorn
+pip install frontier-quant[all]      →  + yfinance, pandas, fastapi, uvicorn
+pip install frontier-quant[dev]      →  + pytest, ruff, mypy, httpx, stubs
 ```
 
 The install extras mirror the module boundaries exactly. You can ship `frontier.core` in a serverless function with a 10 MB dependency footprint, or the full stack in a Docker container — the same `pyproject.toml` controls both.

@@ -4,7 +4,7 @@
 
 [![CI](https://github.com/Pratham-Mishra225/frontier-api/actions/workflows/ci.yml/badge.svg)](https://github.com/Pratham-Mishra225/frontier-api/actions/workflows/ci.yml)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
-[![PyPI](https://img.shields.io/pypi/v/frontier-api.svg)](https://pypi.org/project/frontier-api/)
+[![PyPI](https://img.shields.io/pypi/v/frontier-quant.svg)](https://pypi.org/project/frontier-quant/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Coverage: 92%](https://img.shields.io/badge/coverage-92%25-brightgreen.svg)](#testing)
 
@@ -22,7 +22,7 @@ Frontier implements Modern Portfolio Theory (MPT) as a **library-first** package
 | **FastAPI Service Layer** | Two production endpoints — pure-math and ticker-driven — with full CORS and OpenAPI docs |
 | **Full Type Coverage** | `py.typed` marker shipped; all public functions annotated; MyPy-clean |
 | **Modular Extras** | Install only what you need: core math, data adapter, or HTTP server |
-| **PyPI Distribution** | `pip install frontier-api` — no build step required |
+| **PyPI Distribution** | `pip install frontier-quant` — no build step required |
 | **92% Test Coverage** | Offline unit tests, mocked API tests, and optional live network tests |
 
 ---
@@ -34,7 +34,7 @@ Frontier uses **optional extras** so you install only the dependencies your work
 ### Core Library (pure math — no network, no server)
 
 ```bash
-pip install frontier-api
+pip install frontier-quant
 ```
 
 Installs: `numpy`, `scipy`, `pydantic`.  
@@ -43,7 +43,7 @@ Use this when you already have your own return data and want the optimizer only.
 ### With the Data Adapter
 
 ```bash
-pip install frontier-api[data]
+pip install frontier-quant[data]
 ```
 
 Adds: `yfinance`, `pandas`.  
@@ -52,7 +52,7 @@ Use this to fetch live adjusted-close prices from Yahoo Finance.
 ### With the FastAPI Server
 
 ```bash
-pip install frontier-api[server]
+pip install frontier-quant[server]
 ```
 
 Adds: `fastapi`, `uvicorn`.  
@@ -61,7 +61,7 @@ Use this to run Frontier as a local or containerized REST API.
 ### Everything
 
 ```bash
-pip install frontier-api[all]
+pip install frontier-quant[all]
 ```
 
 Installs all production extras (`data` + `server`). Ideal for full deployments.
@@ -130,7 +130,7 @@ Frontier points        : 20
 ### Option B — With Yahoo Finance Data Adapter
 
 ```bash
-pip install frontier-api[data]
+pip install frontier-quant[data]
 ```
 
 ```python
@@ -149,7 +149,7 @@ for ticker, w in result["optimal_portfolio"]["weights"].items():
 ### Option C — As a REST API
 
 ```bash
-pip install frontier-api[server]
+pip install frontier-quant[server]
 uvicorn frontier.api.main:app --reload
 ```
 

@@ -20,11 +20,11 @@ Frontier is a **library-first quantitative finance package** built around a stat
 
 ## Who Is Frontier For?
 
-**Quantitative analysts** who want a clean Python interface to Markowitz optimization without pulling in a web framework. Install `frontier-api` and call `optimize()` directly.
+**Quantitative analysts** who want a clean Python interface to Markowitz optimization without pulling in a web framework. Install `frontier-quant` and call `optimize()` directly.
 
 **Python developers** building portfolio dashboards who need a clean optimizer callable from their own data pipeline. Use `frontier.core.optimizer.optimize_portfolio()` with any `Dict[str, List[float]]`.
 
-**FastAPI developers** who want a ready-made portfolio optimization microservice they can deploy behind their own auth layer. Install `frontier-api[server]` and `uvicorn frontier.api.main:app`.
+**FastAPI developers** who want a ready-made portfolio optimization microservice they can deploy behind their own auth layer. Install `frontier-quant[server]` and `uvicorn frontier.api.main:app`.
 
 **Open-source contributors** looking for a clean, well-tested, MyPy-clean codebase to learn from or extend.
 
