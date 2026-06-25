@@ -1,135 +1,67 @@
-Frontier API Documentation
+# Frontier Documentation
 
-Frontier is a blazing-fast, stateless Mean-Variance portfolio optimization engine.
+Welcome to the Frontier documentation hub.
 
-Built with a strict separation of concerns, Frontier abstracts the heavy lifting of quantitative finance into an easy-to-use Python library and a deployable FastAPI microservice. Whether you are a Quant passing in proprietary Bloomberg data arrays, or a Web Developer who just wants to pass a list of stock tickers to build a dashboard, Frontier handles the math.
+Frontier is a **library-first quantitative finance package** built around a stateless Mean-Variance portfolio optimization engine. It ships as an ordinary Python library that any quant analyst can `import` and use directly, and optionally as a deployable FastAPI web service.
 
-📦 Installation
+---
 
-Frontier is distributed via PyPI. You can install it in two ways depending on your use case:
+## Documentation Index
 
-1. As a Pure Quantitative Library (For Jupyter / Data Science)
+| Document | Audience | Contents |
+|---|---|---|
+| [Installation Guide](installation.md) | Everyone | All install methods, Python version support |
+| [Quick Start](quickstart.md) | New users | First optimization in 5 minutes |
+| [API Reference](api-reference.md) | Library users | All public functions, classes, signatures |
+| [Architecture](architecture.md) | Contributors, integrators | Design decisions, dependency flow |
+| [Examples](examples.md) | All users | Four copy-paste runnable workflows |
 
-pip install frontier-api
+---
 
+## Who Is Frontier For?
 
-2. As a Web Service (Includes FastAPI & Uvicorn)
+**Quantitative analysts** who want a clean Python interface to Markowitz optimization without pulling in a web framework. Install `frontier-api` and call `optimize()` directly.
 
-pip install frontier-api[server]
+**Python developers** building portfolio dashboards who need a clean optimizer callable from their own data pipeline. Use `frontier.core.optimizer.optimize_portfolio()` with any `Dict[str, List[float]]`.
 
+**FastAPI developers** who want a ready-made portfolio optimization microservice they can deploy behind their own auth layer. Install `frontier-api[server]` and `uvicorn frontier.api.main:app`.
 
-🧠 Core Architecture
+**Open-source contributors** looking for a clean, well-tested, MyPy-clean codebase to learn from or extend.
 
-Frontier is built on two decoupled pillars:
+---
 
-The Math Engine (core.optimizer): Pure NumPy/SciPy linear algebra. It knows nothing about the internet, stock tickers, or Yahoo Finance. It only computes matrices.
+## Core Concepts
 
-The Data Adapters (adapters): Helper functions that reach out to external sources (like yfinance), clean the data, handle missing IPO rows, and format the arrays for the Math Engine.
+### Returns Dictionary
 
-🐍 Python Library Guide
+The fundamental data structure throughout Frontier is a plain Python dict:
 
-If you are using Frontier inside your own Python application, you interact with the Python modules directly.
-
-1. Using the Data Adapter
-
-The yfinance adapter accepts a list of tickers and safely handles missing data to ensure matrix dimensions match perfectly.
-
-from frontier import fetch_data
-
-# Fetch 3 years of daily returns
-returns_dict = fetch_data(
-    tickers=["AAPL", "MSFT", "GOOG"], 
-    lookback_years=3
-)
-
-
-2. Using the Math Engine
-
-Pass your dictionary of returns into the optimizer. You can use the adapter's output, or provide your own proprietary data.
-
-from frontier import optimize
-
-# The risk-free rate defaults to 0.04 (4%)
-result = optimize(returns_dict, risk_free_rate=0.04)
-
-print("Optimal Weights:", result["optimal_portfolio"]["weights"])
-print("Max Sharpe Ratio:", result["optimal_portfolio"]["sharpe_ratio"])
-
-
-🌐 REST API Guide
-
-If you installed with [server], you can instantly launch Frontier as a local REST API.
-
-Start the server:
-
-uvicorn frontier.api.main:app --reload
-
-
-Once running, visit http://localhost:8000/docs for the interactive Swagger UI.
-
-Endpoint 1: /v1/optimize (Pure Math)
-
-Designed for enterprise integration. Send your own calculated return arrays. No internet calls are made by the server.
-
-Request Payload:
-
-{
-  "returns": {
-    "AAPL": [0.012, -0.005, 0.021],
-    "MSFT": [0.008, -0.001, 0.015]
-  },
-  "risk_free_rate": 0.04
+```python
+returns: Dict[str, List[float]] = {
+    "AAPL": [0.010, -0.005, 0.021, ...],  # daily percentage returns
+    "MSFT": [0.008, -0.001, 0.015, ...],
 }
+```
 
+Every asset must have **identical list lengths**. The optimizer treats each float as one periodic return observation (typically daily).
 
-Endpoint 2: /v1/optimize_from_tickers (Convenience)
+### Long-Only Constraint
 
-Designed for frontend developers. Send a list of tickers, and the API will internally fetch the market data, optimize it, and return the weights.
+All portfolios computed by Frontier are **long-only**: weights are strictly bounded `[0.0, 1.0]` and must sum to exactly `1.0`. Short selling is not supported in v0.1.
 
-Request Payload:
+### Annualization
 
-{
-  "tickers": ["AAPL", "MSFT", "GOOG"],
-  "lookback_years": 3,
-  "risk_free_rate": 0.04
-}
+Frontier multiplies daily statistics by **252** (standard US equity trading days per year). If you pass weekly or monthly returns, your results will be over-annualized — adjust your data to daily frequency or file a feature request.
 
+### Efficient Frontier Curve
 
-Standard API Response
+`optimize()` returns a `frontier_curve` list of exactly up to 20 `{"volatility": float, "return_rate": float}` points. These are generated by solving a minimum-volatility sub-problem for 20 evenly-spaced target returns between the lowest and highest mean asset returns. Points where SLSQP fails to converge are omitted — the list may contain fewer than 20 entries in edge cases.
 
-Both endpoints return the exact same JSON structure, allowing seamless plotting of the Efficient Frontier on frontend dashboards.
+---
 
-{
-  "status": "success",
-  "metadata": {
-    "data_source": "Yahoo Finance (yfinance)",
-    "assets_analyzed": ["AAPL", "GOOG", "MSFT"],
-    "trading_days_per_asset": 754
-  },
-  "optimal_portfolio": {
-    "sharpe_ratio": 1.25,
-    "expected_annual_return": 0.38,
-    "annual_volatility": 0.27,
-    "weights": {
-      "AAPL": 0.12,
-      "GOOG": 0.88,
-      "MSFT": 0.0
-    }
-  },
-  "frontier_curve": [
-    { "volatility": 0.21, "return_rate": 0.15 },
-    { "volatility": 0.23, "return_rate": 0.22 }
-    // ... exactly 20 points mapped
-  ]
-}
+## Package Version
 
-
-🧮 Mathematical Notes
-
-Optimization Solver: Uses SciPy's Sequential Least Squares Programming (SLSQP).
-
-Constraints: Long-only (no short selling). Weights are strictly bound between 0.0 and 1.0 and must sum exactly to 1.0.
-
-Annualization: Daily returns and covariance matrices are multiplied by 252 (standard trading days per year).
-
-Efficient Frontier: The frontier_curve array returns exactly 20 optimized coordinates dynamically mapped between the lowest and highest expected returns of the provided assets.
+```python
+import frontier
+print(frontier.__version__)   # e.g. "0.1.0"
+```
