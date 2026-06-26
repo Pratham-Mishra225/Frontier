@@ -1,17 +1,79 @@
-import yfinance as yf
-import pandas as pd
+"""
+frontier.adapters.yfinance_client — Yahoo Finance market data adapter.
+
+This module is part of the optional [data] extra.
+
+    pip install frontier-quant[data]
+
+Importing this module is always safe, even without the optional dependencies
+installed.  The ImportError is deferred to the first function call, keeping
+the rest of the package importable on a core-only install.
+"""
+
 from datetime import datetime, timedelta
 from typing import Dict, List
 
-def fetch_historical_returns(tickers: List[str], lookback_years: int = 3) -> Dict[str, List[float]]:
+
+def fetch_historical_returns(
+    tickers: List[str], lookback_years: int = 3
+) -> Dict[str, List[float]]:
     """
     Fetches historical adjusted close prices for a list of tickers,
     cleans the data, calculates daily periodic returns, and formats
     the output to match the Frontier pure math engine's required input.
+
+    Requires the optional [data] extra:
+
+        pip install frontier-quant[data]
+
+    Parameters
+    ----------
+    tickers : list[str]
+        List of ticker symbols (e.g. ["AAPL", "MSFT"]).  At least two required
+        for portfolio optimisation downstream.
+    lookback_years : int, optional
+        Number of years of historical data to fetch.  Default is 3.
+
+    Returns
+    -------
+    dict[str, list[float]]
+        Mapping of ticker symbol → list of daily periodic returns.
+
+    Raises
+    ------
+    ImportError
+        If ``yfinance`` or ``pandas`` are not installed.
+    ValueError
+        If ``tickers`` is empty, no data is returned, or data cleaning removes
+        all rows.
+    RuntimeError
+        If the network call to Yahoo Finance fails.
     """
+    # ---------------------------------------------------------------------------
+    # Lazy imports — only attempted when the function is actually called.
+    # Importing this module never fails, even on a core-only install.
+    # ---------------------------------------------------------------------------
+    try:
+        import yfinance as yf
+    except ModuleNotFoundError as exc:
+        raise ImportError(
+            "The Yahoo Finance adapter requires the optional 'data' dependencies.\n\n"
+            "Install them with:\n\n"
+            "    pip install frontier-quant[data]"
+        ) from exc
+
+    try:
+        import pandas as pd
+    except ModuleNotFoundError as exc:  # pragma: no cover — same install group as yfinance
+        raise ImportError(
+            "The Yahoo Finance adapter requires the optional 'data' dependencies.\n\n"
+            "Install them with:\n\n"
+            "    pip install frontier-quant[data]"
+        ) from exc
+
     if not tickers:
         raise ValueError("Ticker list cannot be empty.")
-    
+
     # Ensure tickers are uppercase and unique, and sort them for deterministic output
     tickers = sorted(list(set([t.upper() for t in tickers])))
 
@@ -26,28 +88,32 @@ def fetch_historical_returns(tickers: List[str], lookback_years: int = 3) -> Dic
         raise RuntimeError(f"Failed to fetch data from yfinance: {str(e)}")
 
     if df.empty:
-        raise ValueError("No data returned from Yahoo Finance. Check if the ticker symbols are correct.")
+        raise ValueError(
+            "No data returned from Yahoo Finance. "
+            "Check if the ticker symbols are correct."
+        )
 
     # yfinance returns a MultiIndex column dataframe if multiple tickers are passed.
     # We want the 'Adj Close' to account for stock splits and dividends.
-    if 'Adj Close' in df:
-        prices = df['Adj Close']
-    elif 'Close' in df:
-        prices = df['Close']
+    if "Adj Close" in df:
+        prices = df["Adj Close"]
+    elif "Close" in df:
+        prices = df["Close"]
     else:
         raise ValueError("Expected 'Adj Close' or 'Close' in yfinance response.")
 
-    # If only one ticker was passed (even though schemas enforce min_length=2, good for safety), 
-    # prices will be a Series instead of a DataFrame. Convert it to standardize.
+    # If only one ticker was passed (even though schemas enforce min_length=2, good for
+    # safety), prices will be a Series instead of a DataFrame.  Convert to standardise.
     if isinstance(prices, pd.Series):
         prices = prices.to_frame(name=tickers[0])
 
     # ---------------------------------------------------------
     # The Cleaning Layer
     # ---------------------------------------------------------
-    # If a user asks for [AAPL, MSFT, and a stock that IPO'd 1 year ago] with a 3-year lookback,
-    # yfinance will return 3 years of rows, but the new stock will have NaNs for the first 2 years.
-    # We MUST drop all rows with NaNs to ensure matrix dimensions match for the math engine.
+    # If a user asks for [AAPL, MSFT, and a stock that IPO'd 1 year ago] with a 3-year
+    # lookback, yfinance will return 3 years of rows, but the new stock will have NaNs
+    # for the first 2 years.  We MUST drop all rows with NaNs to ensure matrix
+    # dimensions match for the math engine.
     prices_clean = prices.dropna()
 
     if prices_clean.empty:

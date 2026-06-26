@@ -1,0 +1,17 @@
+# frontier-quant — Developer Dependencies
+#
+# This file is for contributors and local development ONLY.
+# It is NOT used during package installation.
+#
+# Usage:
+#   pip install -e ".[all,dev]"
+#
+# Or equivalently (this file):
+#   pip install -r requirements-dev.txt
+#
+# This installs:
+#   - The frontier package in editable mode
+#   - All optional runtime extras (data + server)
+#   - All developer tools (pytest, ruff, mypy, etc.)
+
+-e .[all,dev]

@@ -4,15 +4,35 @@ tests/test_api.py — FastAPI endpoint tests using TestClient.
 All tests in this module run fully offline (no network calls).
 Live yfinance calls are replaced with unittest.mock.patch.
 
+This module requires both the [server] and [data] extras.
+If either is absent, the entire module is skipped cleanly at
+collection time — the rest of the test suite continues unaffected.
+
 Coverage:
   GET  /health                         — status, schema
   POST /v1/optimize                    — happy path, invalid payloads, convergence failure
   POST /v1/optimize_from_tickers       — mocked happy path, missing field
 """
-from unittest.mock import patch
-from fastapi.testclient import TestClient
+import pytest
 
-from frontier.api.main import app
+# ---------------------------------------------------------------------------
+# Guard — skip the entire module if optional server/data deps are absent.
+# pytest.importorskip() will emit a clear SKIP reason and never raise an
+# ImportError that would crash collection for the rest of the test suite.
+# ---------------------------------------------------------------------------
+pytest.importorskip(
+    "fastapi",
+    reason="API tests require pip install frontier-quant[server]",
+)
+pytest.importorskip(
+    "yfinance",
+    reason="API tests require pip install frontier-quant[data]",
+)
+
+from unittest.mock import patch  # noqa: E402 — intentionally after importorskip
+from fastapi.testclient import TestClient  # noqa: E402
+
+from frontier.api.main import app  # noqa: E402
 
 client = TestClient(app)
 
@@ -237,7 +257,7 @@ def test_optimize_from_tickers_mocked_returns_200():
     return HTTP 200 — confirming the routing and response serialisation work.
     """
     with (
-        patch("frontier.api.main.fetch_historical_returns") as mock_fetch,
+        patch("frontier.adapters.yfinance_client.fetch_historical_returns") as mock_fetch,
         patch("frontier.api.main.optimize_portfolio") as mock_opt,
     ):
         mock_fetch.return_value = VALID_RETURNS
@@ -254,7 +274,7 @@ def test_optimize_from_tickers_mocked_returns_200():
 def test_optimize_from_tickers_mocked_response_has_optimal_portfolio():
     """Mocked tickers endpoint must return an 'optimal_portfolio' key."""
     with (
-        patch("frontier.api.main.fetch_historical_returns") as mock_fetch,
+        patch("frontier.adapters.yfinance_client.fetch_historical_returns") as mock_fetch,
         patch("frontier.api.main.optimize_portfolio") as mock_opt,
     ):
         mock_fetch.return_value = VALID_RETURNS
@@ -279,7 +299,7 @@ def test_optimize_from_tickers_missing_tickers_field_returns_422():
 
 def test_optimize_from_tickers_adapter_error_returns_400():
     """A ValueError from the data adapter must map to HTTP 400."""
-    with patch("frontier.api.main.fetch_historical_returns") as mock_fetch:
+    with patch("frontier.adapters.yfinance_client.fetch_historical_returns") as mock_fetch:
         mock_fetch.side_effect = ValueError("No data returned for ticker XYZ.")
         response = client.post(
             "/v1/optimize_from_tickers",
@@ -291,7 +311,7 @@ def test_optimize_from_tickers_adapter_error_returns_400():
 
 def test_optimize_from_tickers_network_error_returns_502():
     """A RuntimeError from yfinance (connection failure) must map to HTTP 502."""
-    with patch("frontier.api.main.fetch_historical_returns") as mock_fetch:
+    with patch("frontier.adapters.yfinance_client.fetch_historical_returns") as mock_fetch:
         mock_fetch.side_effect = RuntimeError("Failed to connect to Yahoo Finance.")
         response = client.post(
             "/v1/optimize_from_tickers",
@@ -302,7 +322,40 @@ def test_optimize_from_tickers_network_error_returns_502():
 
 
 # ===========================================================================
-# Task 5 — Version availability
+# Regression — data adapter missing (server-only install simulation)
+# ===========================================================================
+
+def test_optimize_from_tickers_returns_501_when_data_extra_missing():
+    """
+    Regression test for BUG-01.
+
+    If the [data] extra is not installed, /v1/optimize_from_tickers must
+    return HTTP 501 with a clear installation instruction — not crash the
+    server process at startup.
+
+    We simulate the missing-extra scenario by setting the adapter module to
+    None in sys.modules, which causes any `from ... import` of that module
+    to raise ModuleNotFoundError — exactly what happens on a [server]-only install.
+    """
+    import sys
+
+    # Setting a module to None in sys.modules makes any subsequent
+    # `import frontier.adapters.yfinance_client` raise ModuleNotFoundError.
+    with patch.dict(
+        sys.modules,
+        {"frontier.adapters.yfinance_client": None},  # type: ignore[dict-item]
+    ):
+        response = client.post(
+            "/v1/optimize_from_tickers",
+            json={"tickers": ["AAPL", "MSFT"], "lookback_years": 1},
+        )
+
+    assert response.status_code == 501
+    assert "pip install frontier-quant[data]" in response.json()["detail"]
+
+
+# ===========================================================================
+# Version availability
 # ===========================================================================
 
 def test_frontier_version_is_available():

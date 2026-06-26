@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "frontier-quant"
-version = "0.1.1"
+version = "0.1.2"
 description = "Stateless, high-performance Mean-Variance portfolio optimization engine."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -31,6 +31,8 @@ keywords = [
     "optimization"
 ]
 
+# Core dependencies — always installed.
+# Optional extras (data, server) are NEVER included here.
 dependencies = [
     "pydantic>=2.0.0",
     "numpy>=1.24.0",
@@ -39,16 +41,23 @@ dependencies = [
 
 [project.optional-dependencies]
 
+# Market data adapter — adds Yahoo Finance support.
+# pip install frontier-quant[data]
 data = [
     "yfinance>=0.2.28",
-    "pandas>=2.0.0"
+    "pandas>=2.0.0",
 ]
 
+# HTTP server — adds FastAPI + Uvicorn.
+# pip install frontier-quant[server]
 server = [
     "fastapi>=0.100.0",
-    "uvicorn>=0.23.0"
+    "uvicorn>=0.23.0",
 ]
 
+# Developer toolchain — test runners, linters, type checkers, stubs.
+# pip install frontier-quant[dev]
+# NOT intended for production or end-user installs.
 dev = [
     "pytest",
     "pytest-cov",
@@ -59,22 +68,21 @@ dev = [
     "scipy-stubs",
 ]
 
+# Full runtime — all production extras combined (data + server).
+# Does NOT include dev tools.
+# pip install frontier-quant[all]
 all = [
     "yfinance>=0.2.28",
     "pandas>=2.0.0",
     "fastapi>=0.100.0",
     "uvicorn>=0.23.0",
-    "pytest",
-    "pytest-cov",
-    "httpx",
-    "ruff",
-    "mypy"
 ]
 
 [project.urls]
 Homepage = "https://github.com/Pratham-Mishra225/frontier-api"
 Repository = "https://github.com/Pratham-Mishra225/frontier-api"
 Issues = "https://github.com/Pratham-Mishra225/frontier-api/issues"
+Changelog = "https://github.com/Pratham-Mishra225/frontier-api/blob/main/CHANGELOG.md"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -95,4 +103,3 @@ python_version = "3.12"
 [[tool.mypy.overrides]]
 module = ["yfinance", "yfinance.*"]
 ignore_missing_imports = true
-

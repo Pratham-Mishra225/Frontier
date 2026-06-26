@@ -3,7 +3,7 @@ import scipy.optimize as sco
 from typing import Dict, List, Tuple
 
 
-from frontier.exceptions import ConvergenceError
+from ..exceptions import ConvergenceError
 
 TRADING_DAYS_PER_YEAR = 252
 

@@ -58,13 +58,14 @@ pip install frontier-quant[server]
 Adds: `fastapi`, `uvicorn`.  
 Use this to run Frontier as a local or containerized REST API.
 
-### Everything
+### Full Runtime (data + server)
 
 ```bash
 pip install frontier-quant[all]
 ```
 
-Installs all production extras (`data` + `server`). Ideal for full deployments.
+Installs all production extras (`data` + `server`). Does **not** include dev tools.
+Ideal for full deployments.
 
 ### Development Setup
 
@@ -78,7 +79,10 @@ venv\Scripts\activate
 # macOS / Linux
 source venv/bin/activate
 
-pip install -e ".[dev,data,server]"
+# Installs the package in editable mode with all extras + dev tools
+pip install -r requirements-dev.txt
+# Equivalent to:
+# pip install -e ".[all,dev]"
 ```
 
 > **Requires Python 3.10, 3.11, or 3.12.** CI runs all three.
@@ -136,7 +140,8 @@ pip install frontier-quant[data]
 ```python
 from frontier import fetch_data, optimize
 
-# Fetches 3 years of adjusted-close prices and computes daily returns
+# fetch_data is lazily loaded — the yfinance adapter is only imported
+# when this function is actually called, keeping the core install lightweight.
 returns = fetch_data(["AAPL", "MSFT", "GOOG"], lookback_years=3)
 
 result = optimize(returns, risk_free_rate=0.04)
@@ -146,11 +151,26 @@ for ticker, w in result["optimal_portfolio"]["weights"].items():
     print(f"  {ticker}: {w:.1%}")
 ```
 
+> **Note:** Calling `fetch_data` without the `[data]` extra installed raises an `ImportError`
+> with clear installation instructions — it never silently fails.
+
 ### Option C — As a REST API
 
 ```bash
 pip install frontier-quant[server]
 uvicorn frontier.api.main:app --reload
+```
+
+The server starts with **only the `[server]` extra**. The `/v1/optimize` endpoint
+works immediately. If `/v1/optimize_from_tickers` is called without `[data]` installed,
+it returns **HTTP 501** with a clear install instruction — the server never crashes.
+
+To enable the ticker endpoint:
+
+```bash
+pip install frontier-quant[server] frontier-quant[data]
+# or:
+pip install frontier-quant[all]
 ```
 
 Then in another terminal:
@@ -242,7 +262,10 @@ frontier-api/
 │   ├── test_adapters.py        # yfinance adapter tests (mocked)
 │   ├── test_api.py             # FastAPI endpoint tests (fully offline)
 │   ├── test_exceptions.py      # Exception hierarchy tests
+│   ├── test_isolation.py       # Dependency isolation regression tests (v0.1.2)
 │   └── test_full_workflow.py   # Live integration tests (@network)
+├── CHANGELOG.md                # Release history
+├── requirements-dev.txt        # Developer convenience: -e .[all,dev]
 └── src/
     └── frontier/
         ├── __init__.py         # Public API: optimize, fetch_data
@@ -251,7 +274,7 @@ frontier-api/
         ├── core/
         │   └── optimizer.py    # optimize_portfolio, portfolio_performance
         ├── adapters/
-        │   └── yfinance_client.py  # fetch_historical_returns
+        │   └── yfinance_client.py  # fetch_historical_returns (lazy imports)
         ├── models/
         │   └── schemas.py      # OptimizeRequest, OptimizeResponse, ...
         └── api/
@@ -269,7 +292,9 @@ python -m venv venv
 venv\Scripts\activate          # Windows
 # or: source venv/bin/activate  # macOS / Linux
 
-pip install -e ".[dev,data,server]"
+# Install package in editable mode with all extras + dev tools
+pip install -r requirements-dev.txt
+# Equivalent to: pip install -e ".[all,dev]"
 ```
 
 ### Run Tests
@@ -316,7 +341,7 @@ GitHub Actions runs on every push to `main` and every pull request.
 **Workflow** (`.github/workflows/ci.yml`):
 
 1. **Matrix**: Python 3.10, 3.11, 3.12 — each in its own job
-2. **Install**: `pip install -e ".[dev,server,data]"` — all extras
+2. **Install**: `pip install -e ".[all,dev]"` — all runtime extras + dev tools
 3. **Ruff**: linting (`ruff check .`)
 4. **MyPy**: static typing (`mypy src`)
 5. **Tests**: offline suite (`pytest -m "not network"`)
